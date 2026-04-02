@@ -57,12 +57,14 @@ export function GameFlowHeader({ navigation, activeRoute = "" }) {
   );
 }
 
-export function GameFlowFooter() {
+export function GameFlowFooter({ navigation }) {
   return (
     <View style={styles.footer}>
       <Text style={styles.footerBrand}>Sureli</Text>
       <View style={styles.footerLinks}>
-        <Text style={styles.footerLink}>Privacy Policy</Text>
+        <Pressable onPress={() => navigation.navigate("SureliPrivacy")}>
+          <Text style={styles.footerLink}>Privacy Policy</Text>
+        </Pressable>
         <Text style={styles.footerLink}>Terms of Service</Text>
         <Text style={styles.footerLink}>Support</Text>
       </View>
