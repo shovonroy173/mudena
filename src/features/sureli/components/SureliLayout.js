@@ -160,18 +160,20 @@ export default function SureliLayout({
           <View style={[styles.content, contentStyle]}>{children}</View>
         </View>
 
-        {showFooter ? <SimpleFooter /> : null}
+        {showFooter ? <SimpleFooter navigation={navigation} /> : null}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function SimpleFooter() {
+function SimpleFooter({ navigation }) {
   return (
     <View style={styles.footer}>
       <Text style={styles.footerBrand}>Sureli</Text>
       <View style={styles.footerLinks}>
-        <Text style={styles.footerLink}>Privacy Policy</Text>
+        <Pressable onPress={() => navigation.navigate("SureliPrivacy")}>
+          <Text style={styles.footerLink}>Privacy Policy</Text>
+        </Pressable>
         <Text style={styles.footerLink}>Terms of Service</Text>
         <Text style={styles.footerLink}>Support</Text>
       </View>
