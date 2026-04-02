@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import SplashScreen from "../screens/SplashScreen";
 import HomeScreen from "../screens/HomeScreen";
 import InfoScreen from "../screens/InfoScreen";
 import AuthScreen from "../screens/AuthScreen";
@@ -15,6 +16,7 @@ const Stack = createNativeStackNavigator();
 export default function SureliStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade" }}>
+      <Stack.Screen name="SureliSplash" component={SplashScreen} />
       <Stack.Screen name="SureliHome" component={HomeScreen} />
 
       <Stack.Screen
