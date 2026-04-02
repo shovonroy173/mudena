@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { Image, Modal, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native";
 import SureliLayout from "../components/SureliLayout";
 import { PrimaryButton } from "../components/SureliPrimitives";
 import { myGamesGrid, sureliAssets, tileLabels } from "../data/catalog";
@@ -14,10 +14,19 @@ const gameTileImages = [
   sureliAssets.imgLogoAlt,
 ];
 
+const packOptions = [
+  { id: "ten", label: "KWD 19 - 10 games", payLabel: "KWD 19.00 - Pay now", color: "#FF4F8D" },
+  { id: "five", label: "KWD 10 - 5 games", payLabel: "KWD 10.00 - Pay now", color: "#7B61F3" },
+  { id: "two", label: "KWD 4.5 - Two games", payLabel: "KWD 4.50 - Pay now", color: "#1ED79C" },
+  { id: "one", label: "KWD 2.5 - One game", payLabel: "KWD 2.50 - Pay now", color: "#FF239A" },
+];
+
 export default function MyGamesScreen({ navigation }) {
   const { width } = useWindowDimensions();
   const [categorySearch, setCategorySearch] = useState("h by category");
   const [nameSearch, setNameSearch] = useState("search by nam");
+  const [buyModalVisible, setBuyModalVisible] = useState(false);
+  const [selectedPack, setSelectedPack] = useState(packOptions[0]);
   const visibleGames = myGamesGrid.slice(0, 6);
   const compact = width < 860;
   const narrow = width < 700;
@@ -38,6 +47,7 @@ export default function MyGamesScreen({ navigation }) {
             </Pressable>
             <PrimaryButton
               label="Buy a new game +"
+              onPress={() => setBuyModalVisible(true)}
               style={styles.headerBuyButton}
               textStyle={styles.headerBuyText}
             />
@@ -82,7 +92,12 @@ export default function MyGamesScreen({ navigation }) {
 
         <View style={[styles.toolbar, compact ? styles.toolbarCompact : null]}>
           <SearchBox value={categorySearch} onChangeText={setCategorySearch} />
-          <PrimaryButton label="Buy a new game" style={styles.buyButton} textStyle={styles.buyButtonText} />
+          <PrimaryButton
+            label="Buy a new game"
+            onPress={() => setBuyModalVisible(true)}
+            style={styles.buyButton}
+            textStyle={styles.buyButtonText}
+          />
           <SearchBox value={nameSearch} onChangeText={setNameSearch} />
         </View>
 
@@ -131,12 +146,66 @@ export default function MyGamesScreen({ navigation }) {
       <View style={styles.footerBlock}>
         <Text style={styles.footerBrand}>Sureli</Text>
         <View style={styles.footerLinks}>
-          <Text style={styles.footerLink}>Privacy Policy</Text>
+          <Pressable onPress={() => navigation.navigate("SureliPrivacy")}>
+            <Text style={styles.footerLink}>Privacy Policy</Text>
+          </Pressable>
           <Text style={styles.footerLink}>Terms of Service</Text>
           <Text style={styles.footerLink}>Support</Text>
         </View>
         <Text style={styles.footerCopy}>© 2024 Sureli Trivia. Elevate your knowledge.</Text>
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={buyModalVisible}
+        presentationStyle="fullScreen"
+        supportedOrientations={["landscape-left", "landscape-right"]}
+        onRequestClose={() => setBuyModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setBuyModalVisible(false)} />
+          <View style={[styles.modalCard, compact ? styles.modalCardCompact : null]}>
+            <Pressable style={styles.modalClose} onPress={() => setBuyModalVisible(false)}>
+              <Text style={styles.modalCloseText}>×</Text>
+            </Pressable>
+
+            <Text style={styles.modalTitle}>Select Your Pack</Text>
+            <Text style={styles.modalSubtitle}>Choose the best energy for your session.</Text>
+
+            <View style={styles.packList}>
+              {packOptions.map((pack) => {
+                const selected = selectedPack.id === pack.id;
+
+                return (
+                  <Pressable
+                    key={pack.id}
+                    onPress={() => setSelectedPack(pack)}
+                    style={[
+                      styles.packButton,
+                      { backgroundColor: pack.color },
+                      selected ? styles.packButtonSelected : null,
+                    ]}
+                  >
+                    <Text style={styles.packButtonText}>{pack.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={styles.discountBox}>
+              <View style={styles.discountBadge}>
+                <Text style={styles.discountBadgeText}>+ addition</Text>
+              </View>
+              <Text style={styles.discountPlaceholder}>discount code</Text>
+            </View>
+
+            <Pressable style={styles.payButton} onPress={() => setBuyModalVisible(false)}>
+              <Text style={styles.payButtonText}>{selectedPack.payLabel}</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SureliLayout>
   );
 }
@@ -223,21 +292,21 @@ const styles = StyleSheet.create({
   },
   heroTagText: {
     color: "#8E9AB0",
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: "800",
     letterSpacing: 0.45,
   },
   heroTitle: {
     marginTop: 18,
     color: colors.ink,
-    fontSize: 30,
-    lineHeight: 42,
+    fontSize: 34,
+    lineHeight: 46,
     fontWeight: "400",
     textAlign: "center",
   },
   heroTitleCompact: {
-    fontSize: 34,
-    lineHeight: 46,
+    fontSize: 38,
+    lineHeight: 50,
   },
   heroAccent: {
     color: colors.pink,
@@ -246,13 +315,13 @@ const styles = StyleSheet.create({
   heroSubtitle: {
     marginTop: 12,
     color: "#A2ADBF",
-    fontSize: 9,
-    lineHeight: 14,
+    fontSize: 11,
+    lineHeight: 17,
     textAlign: "center",
   },
   heroSubtitleCompact: {
-    fontSize: 11,
-    lineHeight: 17,
+    fontSize: 13,
+    lineHeight: 19,
   },
   toggleRow: {
     marginTop: 18,
@@ -276,12 +345,12 @@ const styles = StyleSheet.create({
   },
   newGameText: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "800",
   },
   toggleArrowDark: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "900",
   },
   myGameButton: {
@@ -296,22 +365,22 @@ const styles = StyleSheet.create({
   },
   myGameText: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "800",
   },
   toggleArrowLight: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "900",
   },
   sectionTitle: {
     marginTop: 22,
     color: colors.ink,
-    fontSize: 22,
+    fontSize: 25,
     fontWeight: "500",
   },
   sectionTitleCompact: {
-    fontSize: 26,
+    fontSize: 28,
   },
   toolbar: {
     width: "100%",
@@ -343,7 +412,7 @@ const styles = StyleSheet.create({
   },
   searchBadgeText: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "800",
   },
   searchInner: {
@@ -357,7 +426,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     color: "#9CA8BC",
-    fontSize: 11,
+    fontSize: 12,
     paddingVertical: 0,
   },
   buyButton: {
@@ -367,7 +436,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   buyButtonText: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "800",
   },
   grid: {
@@ -411,7 +480,7 @@ const styles = StyleSheet.create({
   },
   playersBadgeText: {
     color: "#FFFFFF",
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: "800",
   },
   cardTop: {
@@ -439,11 +508,11 @@ const styles = StyleSheet.create({
   },
   playButtonText: {
     color: "#45536B",
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: "700",
   },
   playButtonTextCompact: {
-    fontSize: 11,
+    fontSize: 12,
   },
   tileGrid: {
     flexDirection: "row",
@@ -467,7 +536,7 @@ const styles = StyleSheet.create({
   },
   tileBarText: {
     color: "#FFFFFF",
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: "800",
   },
   pagination: {
@@ -481,7 +550,7 @@ const styles = StyleSheet.create({
   },
   paginationGhost: {
     color: "#D7DCE4",
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: "700",
   },
   paginationActive: {
@@ -494,7 +563,7 @@ const styles = StyleSheet.create({
   },
   paginationActiveText: {
     color: "#FFFFFF",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "800",
   },
   paginationCircle: {
@@ -508,7 +577,7 @@ const styles = StyleSheet.create({
   },
   paginationCircleText: {
     color: "#54617A",
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "700",
   },
   footerBlock: {
@@ -541,6 +610,136 @@ const styles = StyleSheet.create({
     color: "#939393",
     fontSize: 12,
     fontWeight: "400",
+    textAlign: "center",
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(28, 26, 38, 0.34)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    width: "100%",
+    maxWidth: 500,
+    borderRadius: 36,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 28,
+    paddingTop: 28,
+    paddingBottom: 30,
+    shadowColor: "#4C174A",
+    shadowOpacity: 0.28,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 16 },
+    elevation: 18,
+  },
+  modalCardCompact: {
+    maxWidth: 420,
+    paddingHorizontal: 22,
+    borderRadius: 28,
+  },
+  modalClose: {
+    position: "absolute",
+    top: 18,
+    right: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F7EFF5",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  modalCloseText: {
+    color: "#6D4563",
+    fontSize: 20,
+    lineHeight: 20,
+    fontWeight: "700",
+  },
+  modalTitle: {
+    color: "#4E2C46",
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "800",
+  },
+  modalSubtitle: {
+    marginTop: 8,
+    color: "#9A738E",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "500",
+  },
+  packList: {
+    marginTop: 24,
+    gap: 16,
+  },
+  packButton: {
+    minHeight: 84,
+    borderRadius: 22,
+    justifyContent: "center",
+    paddingHorizontal: 28,
+  },
+  packButtonSelected: {
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+    shadowColor: "#C33B84",
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  packButtonText: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: "800",
+  },
+  discountBox: {
+    marginTop: 28,
+    minHeight: 58,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#F1DDEB",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingHorizontal: 14,
+  },
+  discountBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "#FFE7F0",
+  },
+  discountBadgeText: {
+    color: "#D34C83",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  discountPlaceholder: {
+    color: "#C6B2C1",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  payButton: {
+    marginTop: 30,
+    minHeight: 72,
+    borderRadius: 999,
+    backgroundColor: "#2C4BB5",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 22,
+    shadowColor: "#2941A5",
+    shadowOpacity: 0.24,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  payButtonText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "800",
     textAlign: "center",
   },
 });
